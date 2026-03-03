@@ -27,6 +27,11 @@ def _slugify_domain(domain: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", domain.lower()).strip("_")
 
 
+def _format_metrics(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Format raw metric items into readable dicts."""
+    return [{"name": item.get("x", ""), "count": item.get("y", 0)} for item in items]
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -100,24 +105,85 @@ class UmamiSensor(CoordinatorEntity[UmamiCoordinator], SensorEntity):
         if site is None:
             return None
 
-        if self._sensor_type == "avg_visit_time":
-            return site.avg_visit_time
+        if self._sensor_type in ("avg_visit_time", "bounce_rate", "views_per_visit"):
+            return getattr(site, self._sensor_type, None)
 
         return getattr(site, self._sensor_type, None)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:
-        """Return extra attributes for the pageviews sensor."""
-        if self._sensor_type != "pageviews":
-            return None
-
+        """Return extra attributes with full metric breakdowns."""
         site = self._site_data
         if site is None:
             return None
 
-        return {
-            "top_pages": site.top_pages[:10],
-            "top_referrers": site.top_referrers[:10],
-            "top_browsers": site.top_browsers[:10],
-            "top_countries": site.top_countries[:10],
-        }
+        attrs = _SENSOR_ATTRIBUTES.get(self._sensor_type)
+        if attrs is None:
+            return None
+
+        return attrs(site)
+
+
+def _pageviews_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the pageviews sensor."""
+    return {
+        "top_pages": _format_metrics(site.top_pages),
+        "top_entry_pages": _format_metrics(site.top_entry_pages),
+        "top_exit_pages": _format_metrics(site.top_exit_pages),
+        "top_titles": _format_metrics(site.top_titles),
+    }
+
+
+def _visitors_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the visitors sensor."""
+    return {
+        "top_countries": _format_metrics(site.top_countries),
+        "top_regions": _format_metrics(site.top_regions),
+        "top_cities": _format_metrics(site.top_cities),
+        "top_languages": _format_metrics(site.top_languages),
+    }
+
+
+def _visits_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the visits sensor."""
+    return {
+        "top_referrers": _format_metrics(site.top_referrers),
+        "top_channels": _format_metrics(site.top_channels),
+    }
+
+
+def _bounces_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the bounces sensor."""
+    return {
+        "bounce_rate": site.bounce_rate,
+        "top_entry_pages": _format_metrics(site.top_entry_pages),
+        "top_exit_pages": _format_metrics(site.top_exit_pages),
+    }
+
+
+def _active_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the active users sensor."""
+    return {
+        "top_browsers": _format_metrics(site.top_browsers),
+        "top_os": _format_metrics(site.top_os),
+        "top_devices": _format_metrics(site.top_devices),
+        "top_screens": _format_metrics(site.top_screens),
+    }
+
+
+def _events_attrs(site: UmamiSiteData) -> dict[str, Any]:
+    """Attributes for the events sensor."""
+    return {
+        "top_events": _format_metrics(site.top_events),
+    }
+
+
+# Map sensor types to their attribute functions
+_SENSOR_ATTRIBUTES: dict[str, Any] = {
+    "pageviews": _pageviews_attrs,
+    "visitors": _visitors_attrs,
+    "visits": _visits_attrs,
+    "bounces": _bounces_attrs,
+    "active_users": _active_attrs,
+    "events": _events_attrs,
+}

@@ -35,17 +35,36 @@ class UmamiSiteData:
     site_id: str
     name: str
     domain: str
+
+    # Core stats from /stats endpoint
     pageviews: int = 0
     visitors: int = 0
     visits: int = 0
     bounces: int = 0
     totaltime: int = 0
+
+    # Realtime
     active_users: int = 0
+
+    # Events
     events: int = 0
+
+    # Metric breakdowns (top 10 each)
     top_pages: list[dict[str, Any]] = field(default_factory=list)
+    top_entry_pages: list[dict[str, Any]] = field(default_factory=list)
+    top_exit_pages: list[dict[str, Any]] = field(default_factory=list)
     top_referrers: list[dict[str, Any]] = field(default_factory=list)
+    top_channels: list[dict[str, Any]] = field(default_factory=list)
     top_browsers: list[dict[str, Any]] = field(default_factory=list)
+    top_os: list[dict[str, Any]] = field(default_factory=list)
+    top_devices: list[dict[str, Any]] = field(default_factory=list)
     top_countries: list[dict[str, Any]] = field(default_factory=list)
+    top_regions: list[dict[str, Any]] = field(default_factory=list)
+    top_cities: list[dict[str, Any]] = field(default_factory=list)
+    top_languages: list[dict[str, Any]] = field(default_factory=list)
+    top_screens: list[dict[str, Any]] = field(default_factory=list)
+    top_events: list[dict[str, Any]] = field(default_factory=list)
+    top_titles: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def avg_visit_time(self) -> float:
@@ -53,6 +72,20 @@ class UmamiSiteData:
         if self.visits == 0:
             return 0.0
         return round(self.totaltime / self.visits, 1)
+
+    @property
+    def bounce_rate(self) -> float:
+        """Calculate bounce rate as a percentage."""
+        if self.visits == 0:
+            return 0.0
+        return round((self.bounces / self.visits) * 100, 1)
+
+    @property
+    def views_per_visit(self) -> float:
+        """Calculate average pageviews per visit."""
+        if self.visits == 0:
+            return 0.0
+        return round(self.pageviews / self.visits, 1)
 
 
 class UmamiCoordinator(DataUpdateCoordinator[dict[str, UmamiSiteData]]):
@@ -141,18 +174,25 @@ class UmamiCoordinator(DataUpdateCoordinator[dict[str, UmamiSiteData]]):
         active = await self.client.get_active(site_id)
         events = await self.client.get_events_count(site_id, self._time_range)
 
-        top_pages = await self.client.get_metrics(
-            site_id, "url", self._time_range, limit=10
-        )
-        top_referrers = await self.client.get_metrics(
-            site_id, "referrer", self._time_range, limit=10
-        )
-        top_browsers = await self.client.get_metrics(
-            site_id, "browser", self._time_range, limit=10
-        )
-        top_countries = await self.client.get_metrics(
-            site_id, "country", self._time_range, limit=10
-        )
+        # Fetch all metric dimensions (top 10 each)
+        tr = self._time_range
+        get = self.client.get_metrics
+
+        top_pages = await get(site_id, "path", tr, limit=10)
+        top_entry_pages = await get(site_id, "entry", tr, limit=10)
+        top_exit_pages = await get(site_id, "exit", tr, limit=10)
+        top_referrers = await get(site_id, "referrer", tr, limit=10)
+        top_channels = await get(site_id, "channel", tr, limit=10)
+        top_browsers = await get(site_id, "browser", tr, limit=10)
+        top_os = await get(site_id, "os", tr, limit=10)
+        top_devices = await get(site_id, "device", tr, limit=10)
+        top_countries = await get(site_id, "country", tr, limit=10)
+        top_regions = await get(site_id, "region", tr, limit=10)
+        top_cities = await get(site_id, "city", tr, limit=10)
+        top_languages = await get(site_id, "language", tr, limit=10)
+        top_screens = await get(site_id, "screen", tr, limit=10)
+        top_events = await get(site_id, "event", tr, limit=10)
+        top_titles = await get(site_id, "title", tr, limit=10)
 
         return UmamiSiteData(
             site_id=site_id,
@@ -166,7 +206,18 @@ class UmamiCoordinator(DataUpdateCoordinator[dict[str, UmamiSiteData]]):
             active_users=active,
             events=events,
             top_pages=top_pages,
+            top_entry_pages=top_entry_pages,
+            top_exit_pages=top_exit_pages,
             top_referrers=top_referrers,
+            top_channels=top_channels,
             top_browsers=top_browsers,
+            top_os=top_os,
+            top_devices=top_devices,
             top_countries=top_countries,
+            top_regions=top_regions,
+            top_cities=top_cities,
+            top_languages=top_languages,
+            top_screens=top_screens,
+            top_events=top_events,
+            top_titles=top_titles,
         )

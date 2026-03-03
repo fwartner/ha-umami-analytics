@@ -134,15 +134,40 @@ class UmamiApiClient:
         return True
 
     async def get_websites(self) -> list[dict[str, Any]]:
-        """Fetch all websites from Umami."""
-        result = await self._request(
-            "GET", "/api/websites", params={"pageSize": "100"}
-        )
-        if isinstance(result, dict) and "data" in result:
-            return result["data"]
-        if isinstance(result, list):
-            return result
-        return []
+        """Fetch all websites from Umami, including team websites.
+
+        Paginates through all results and includes team-owned sites.
+        """
+        all_sites: list[dict[str, Any]] = []
+        page = 1
+        page_size = 100
+
+        while True:
+            result = await self._request(
+                "GET",
+                "/api/websites",
+                params={
+                    "includeTeams": "true",
+                    "pageSize": str(page_size),
+                    "page": str(page),
+                },
+            )
+
+            if isinstance(result, dict) and "data" in result:
+                sites = result["data"]
+                all_sites.extend(sites)
+                # Stop if we got fewer than requested (last page)
+                if len(sites) < page_size:
+                    break
+                page += 1
+            elif isinstance(result, list):
+                # Older Umami versions return a plain list
+                all_sites.extend(result)
+                break
+            else:
+                break
+
+        return all_sites
 
     async def get_stats(
         self, website_id: str, time_range: str = "today"

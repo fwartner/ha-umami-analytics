@@ -7,16 +7,17 @@
 
 Monitor your [Umami Analytics](https://umami.is) website statistics directly in Home Assistant.
 
-Supports both **self-hosted Umami** instances and **Umami Cloud**.
+Supports both **self-hosted Umami** instances and **Umami Cloud**. Shows websites from **all teams**.
 
 ---
 
 ## Features
 
 - **Dual authentication** — Self-hosted (username/password) or Umami Cloud (API key)
+- **All teams** — Automatically discovers websites from all teams you belong to
 - **Site selection** — Choose which websites to monitor during setup
-- **7 sensors per site** — Pageviews, visitors, visits, bounces, avg visit time, active users, events
-- **Rich attributes** — Top 10 pages, referrers, browsers, and countries on the pageviews sensor
+- **9 sensors per site** — Pageviews, visitors, visits, bounces, bounce rate, avg visit time, views per visit, active users, events
+- **Full metric breakdowns** — 15 metric dimensions as attributes across sensors (pages, entry/exit pages, referrers, channels, browsers, OS, devices, countries, regions, cities, languages, screens, events, titles)
 - **Configurable** — Time range (today / 24h / 7d / 30d / this month) and update interval (1–60 min)
 - **Device grouping** — Each website appears as a device with all its sensors
 - **Translations** — English and German included
@@ -45,12 +46,12 @@ Supports both **self-hosted Umami** instances and **Umami Cloud**.
 4. Select your authentication method:
    - **Self-hosted**: Enter your Umami username and password
    - **Umami Cloud**: Enter your API key
-5. Select which websites to monitor
+5. Select which websites to monitor (includes sites from all teams)
 6. Done! Sensors will appear under the new Umami device(s)
 
 ## Sensors
 
-For each selected website, the following sensors are created:
+For each selected website, **9 sensors** are created:
 
 | Sensor | Description | Unit |
 |--------|-------------|------|
@@ -58,18 +59,34 @@ For each selected website, the following sensors are created:
 | **Visitors** | Unique visitors | visitors |
 | **Visits** | Total sessions | visits |
 | **Bounces** | Single-page visits | bounces |
+| **Bounce Rate** | Percentage of single-page visits | % |
 | **Avg Visit Time** | Average session duration | seconds |
+| **Views Per Visit** | Average pageviews per session | pages |
 | **Active Users** | Currently active visitors (realtime) | users |
 | **Events** | Custom events tracked | events |
 
 ### Extra Attributes
 
-The **Pageviews** sensor includes extra state attributes:
+Each sensor includes rich attributes with top 10 metric breakdowns:
 
-- `top_pages` — Top 10 most visited pages
-- `top_referrers` — Top 10 traffic sources
-- `top_browsers` — Top 10 browsers
-- `top_countries` — Top 10 visitor countries
+| Sensor | Attributes |
+|--------|------------|
+| **Pageviews** | `top_pages`, `top_entry_pages`, `top_exit_pages`, `top_titles` |
+| **Visitors** | `top_countries`, `top_regions`, `top_cities`, `top_languages` |
+| **Visits** | `top_referrers`, `top_channels` |
+| **Bounces** | `bounce_rate`, `top_entry_pages`, `top_exit_pages` |
+| **Active Users** | `top_browsers`, `top_os`, `top_devices`, `top_screens` |
+| **Events** | `top_events` |
+
+Each attribute is a list of `{name, count}` objects. Example:
+
+```yaml
+top_pages:
+  - name: /home
+    count: 1234
+  - name: /about
+    count: 567
+```
 
 These can be used in templates, automations, or Lovelace cards.
 
@@ -104,6 +121,10 @@ After setup, configure the integration via **Settings** > **Devices & Services**
 **Sensors show "unavailable"**
 - Check Home Assistant logs for errors from the `umami` integration
 - Verify the Umami instance is online and the API is responding
+
+**Missing websites from teams**
+- Ensure your Umami user account is a member of the teams that own those websites
+- The integration automatically includes all team websites you have access to
 
 ## Contributing
 
