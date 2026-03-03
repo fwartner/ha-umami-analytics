@@ -1,0 +1,45 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Umami Analytics",
+        "description": "Enter your Umami instance details. For self-hosted, use username/password. For Umami Cloud, use your API key.",
+        "data": {
+          "url": "URL",
+          "auth_type": "Authentication type",
+          "username": "Username",
+          "password": "Password",
+          "api_key": "API Key"
+        }
+      },
+      "sites": {
+        "title": "Select websites to monitor",
+        "description": "Choose which Umami websites you want to track in Home Assistant.",
+        "data": {
+          "sites": "Websites"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid credentials. Please check your username/password or API key.",
+      "cannot_connect": "Cannot connect to Umami instance. Check the URL.",
+      "unknown": "An unexpected error occurred.",
+      "no_sites_selected": "Please select at least one website."
+    },
+    "abort": {
+      "already_configured": "This Umami instance is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Umami Analytics Options",
+        "description": "Configure the time range and update interval for your Umami sensors.",
+        "data": {
+          "time_range": "Time range",
+          "update_interval": "Update interval"
+        }
+      }
+    }
+  }
+}

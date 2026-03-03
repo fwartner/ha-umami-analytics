@@ -1,0 +1,12 @@
+{
+  "domain": "umami",
+  "name": "Umami Analytics",
+  "codeowners": ["@fwartner"],
+  "config_flow": true,
+  "documentation": "https://github.com/fwartner/ha-umami-analytics",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/fwartner/ha-umami-analytics/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}
