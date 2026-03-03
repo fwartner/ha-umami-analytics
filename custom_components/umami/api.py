@@ -227,6 +227,41 @@ class UmamiApiClient:
             return sum(item.get("y", item.get("visitors", 0)) for item in result)
         return 0
 
+    async def send_event(
+        self,
+        website_id: str,
+        event_name: str,
+        url_path: str = "/",
+        referrer: str = "",
+        data: dict[str, Any] | None = None,
+    ) -> None:
+        """Send a custom event to Umami via the collection API."""
+        session = await self._get_session()
+        payload: dict[str, Any] = {
+            "website": website_id,
+            "url": url_path,
+            "name": event_name,
+            "hostname": "homeassistant.local",
+            "language": "en",
+            "screen": "1920x1080",
+        }
+        if referrer:
+            payload["referrer"] = referrer
+        if data:
+            payload["data"] = data
+
+        try:
+            resp = await session.post(
+                f"{self._url}/api/send",
+                json={"type": "event", "payload": payload},
+                headers={"User-Agent": "Home Assistant Umami Integration"},
+            )
+        except aiohttp.ClientError as err:
+            raise UmamiConnectionError(f"Cannot connect to {self._url}") from err
+
+        if resp.status not in (200, 201):
+            raise UmamiApiError(f"Failed to send event: {resp.status}")
+
     @staticmethod
     def _time_range_to_timestamps(time_range: str) -> tuple[int, int]:
         """Convert time range string to start/end millisecond timestamps."""

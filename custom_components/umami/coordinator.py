@@ -166,6 +166,30 @@ class UmamiCoordinator(DataUpdateCoordinator[dict[str, UmamiSiteData]]):
 
         return data
 
+    async def async_get_site_stats(
+        self, site_id: str, time_range: str | None = None
+    ) -> dict[str, Any]:
+        """Fetch stats for a specific site with an optional time range override.
+
+        Used by the get_stats service action. Returns raw stats dict.
+        """
+        tr = time_range or self._time_range
+        stats = await self.client.get_stats(site_id, tr)
+        active = await self.client.get_active(site_id)
+        events = await self.client.get_events_count(site_id, tr)
+
+        return {
+            "site_id": site_id,
+            "time_range": tr,
+            "pageviews": self._extract_stat(stats, "pageviews"),
+            "visitors": self._extract_stat(stats, "visitors"),
+            "visits": self._extract_stat(stats, "visits"),
+            "bounces": self._extract_stat(stats, "bounces"),
+            "totaltime": self._extract_stat(stats, "totaltime"),
+            "active_users": active,
+            "events": events,
+        }
+
     async def _fetch_site_data(
         self, site_id: str, meta: dict[str, str]
     ) -> UmamiSiteData:

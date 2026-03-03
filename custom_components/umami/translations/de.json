@@ -41,5 +41,47 @@
         }
       }
     }
+  },
+  "services": {
+    "refresh": {
+      "name": "Daten aktualisieren",
+      "description": "Erzwingt eine sofortige Aktualisierung aller Umami Analytics Daten."
+    },
+    "get_stats": {
+      "name": "Statistiken abrufen",
+      "description": "Aktuelle Statistiken für alle überwachten Websites abrufen. Gibt Statistiken als Antwortdaten zurück.",
+      "fields": {
+        "time_range": {
+          "name": "Zeitraum",
+          "description": "Zeitraum für Statistiken. Verwendet den konfigurierten Zeitraum wenn nicht angegeben."
+        }
+      }
+    },
+    "track_event": {
+      "name": "Event verfolgen",
+      "description": "Sendet ein benutzerdefiniertes Event an eine Umami-Website.",
+      "fields": {
+        "website_id": {
+          "name": "Website-ID",
+          "description": "Die Umami Website-ID, an die das Event gesendet werden soll."
+        },
+        "event_name": {
+          "name": "Event-Name",
+          "description": "Name des zu verfolgenden Events."
+        },
+        "url": {
+          "name": "URL-Pfad",
+          "description": "URL-Pfad, der mit dem Event verknüpft ist (Standard: /)."
+        },
+        "referrer": {
+          "name": "Referrer",
+          "description": "Referrer-URL für das Event."
+        },
+        "data": {
+          "name": "Event-Daten",
+          "description": "Zusätzliche Daten, die dem Event als Schlüssel-Wert-Paare hinzugefügt werden."
+        }
+      }
+    }
   }
 }

@@ -41,5 +41,47 @@
         }
       }
     }
+  },
+  "services": {
+    "refresh": {
+      "name": "Refresh data",
+      "description": "Force an immediate refresh of all Umami Analytics data."
+    },
+    "get_stats": {
+      "name": "Get stats",
+      "description": "Fetch current statistics for all monitored sites. Returns stats as response data.",
+      "fields": {
+        "time_range": {
+          "name": "Time range",
+          "description": "Time range for stats. Defaults to the configured time range if not specified."
+        }
+      }
+    },
+    "track_event": {
+      "name": "Track event",
+      "description": "Send a custom event to an Umami website.",
+      "fields": {
+        "website_id": {
+          "name": "Website ID",
+          "description": "The Umami website ID to send the event to."
+        },
+        "event_name": {
+          "name": "Event name",
+          "description": "Name of the event to track."
+        },
+        "url": {
+          "name": "URL path",
+          "description": "URL path associated with the event (default: /)."
+        },
+        "referrer": {
+          "name": "Referrer",
+          "description": "Referrer URL for the event."
+        },
+        "data": {
+          "name": "Event data",
+          "description": "Additional data to attach to the event as key-value pairs."
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,41 @@
+refresh:
+  fields:
+
+get_stats:
+  target:
+    entity:
+      integration: umami
+  fields:
+    time_range:
+      required: false
+      selector:
+        select:
+          options:
+            - "today"
+            - "24h"
+            - "7d"
+            - "30d"
+            - "month"
+
+track_event:
+  fields:
+    website_id:
+      required: true
+      selector:
+        text:
+    event_name:
+      required: true
+      selector:
+        text:
+    url:
+      required: false
+      selector:
+        text:
+    referrer:
+      required: false
+      selector:
+        text:
+    data:
+      required: false
+      selector:
+        object:
