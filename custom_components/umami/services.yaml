@@ -1,10 +1,6 @@
 refresh:
-  fields:
 
 get_stats:
-  target:
-    entity:
-      integration: umami
   fields:
     time_range:
       required: false
